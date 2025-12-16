@@ -2,6 +2,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from ucl_parser import parse_text, UclSyntaxError
+
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
@@ -14,17 +16,15 @@ def parse_args(argv):
     )
     parser.add_argument(
         "-i", "--input",
-        help="Путь к входному файлу с конфигурацией",
+        help="Путь к входному файлу (по умолчанию: config.ucl рядом с main.py)",
     )
     return parser.parse_args(argv)
 
 
-def resolve_input_path(arg_value: str | None) -> Path:
+def resolve_input_path(arg_value):
     if arg_value:
         return Path(arg_value)
-
-    default_path = Path(__file__).resolve().parent / "config.ucl"
-    return default_path
+    return Path(__file__).resolve().parent / "config.ucl"
 
 
 def main(argv=None) -> int:
@@ -37,17 +37,19 @@ def main(argv=None) -> int:
     try:
         text = read_text(input_path)
     except FileNotFoundError:
-        print(
-            "Ошибка: входной файл не найден.\n"
-            f"Передай путь через -i/--input или создай файл по умолчанию: {input_path}",
-            file=sys.stderr,
-        )
+        print(f"Ошибка: файл не найден: {input_path}", file=sys.stderr)
         return 1
     except OSError as e:
         print(f"Ошибка чтения файла {input_path}: {e}", file=sys.stderr)
         return 1
 
-    sys.stdout.write(text)
+    try:
+        ast = parse_text(text)
+    except UclSyntaxError as e:
+        print(f"{e}", file=sys.stderr)
+        return 1
+
+    print(ast)
     return 0
 
 
