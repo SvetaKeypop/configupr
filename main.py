@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from ucl_parser import parse_text, UclSyntaxError
+from ucl_eval import evaluate_document, UclEvalError
 
 
 def read_text(path: Path) -> str:
@@ -16,7 +17,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         "-i", "--input",
-        help="Путь к входному файлу (по умолчанию: config.ucl рядом с main.py)",
+        help="Путь к входному файлу",
     )
     return parser.parse_args(argv)
 
@@ -25,6 +26,16 @@ def resolve_input_path(arg_value):
     if arg_value:
         return Path(arg_value)
     return Path(__file__).resolve().parent / "config.ucl"
+
+
+def dump_yaml(obj) -> str:
+    try:
+        import yaml
+    except ImportError:
+        print("Ошибка: не установлен пакет pyyaml.", file=sys.stderr)
+        raise SystemExit(1)
+
+    return yaml.safe_dump(obj, allow_unicode=True, sort_keys=False)
 
 
 def main(argv=None) -> int:
@@ -45,11 +56,12 @@ def main(argv=None) -> int:
 
     try:
         ast = parse_text(text)
-    except UclSyntaxError as e:
-        print(f"{e}", file=sys.stderr)
+        result_obj = evaluate_document(ast)
+    except (UclSyntaxError, UclEvalError) as e:
+        print(str(e), file=sys.stderr)
         return 1
 
-    print(ast)
+    sys.stdout.write(dump_yaml(result_obj))
     return 0
 
 

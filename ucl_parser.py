@@ -36,7 +36,6 @@ SIGNED_SCI_NUMBER: /[+-]?\d+\.?\d*[eE][+-]?\d+/
 %ignore WS
 """
 
-
 _parser = Lark(_GRAMMAR, parser="lalr")
 
 
@@ -45,7 +44,7 @@ class _ToAst(Transformer):
         defs = []
         value = None
         for x in items:
-            if isinstance(x, tuple) and len(x) >= 1 and x[0] == "def":
+            if isinstance(x, tuple) and x and x[0] == "def":
                 defs.append(x)
             else:
                 value = x
@@ -54,7 +53,7 @@ class _ToAst(Transformer):
     def def_stmt(self, items):
         name_tok = items[0]
         val = items[1]
-        return ("def", str(name_tok), val)
+        return ("def", str(name_tok), val, name_tok.line, name_tok.column)
 
     def number(self, items):
         return float(str(items[0]))
@@ -64,7 +63,7 @@ class _ToAst(Transformer):
 
     def ref(self, items):
         name_tok = items[0]
-        return ("ref", str(name_tok))
+        return ("ref", str(name_tok), name_tok.line, name_tok.column)
 
     def pair(self, items):
         key_tok = items[0]
