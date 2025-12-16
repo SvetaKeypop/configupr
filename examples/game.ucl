@@ -1,0 +1,13 @@
+(def hp 1e+2)
+(def dmg 1e+1)
+$[
+  unit: "shark",
+  stats: $[
+    hp: {hp},
+    dmg: {dmg},
+    speed: 2e+0,
+  ],
+  loot: $[
+    gold: 5e+0,
+  ],
+]

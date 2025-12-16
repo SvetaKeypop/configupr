@@ -1,0 +1,10 @@
+(def start 9e+0)
+$[
+  group: "ikbo-12-24",
+  day: "tuesday",
+  firstlesson: {start},
+  rooms: $[
+    a: "a101",
+    b: "b202",
+  ],
+]

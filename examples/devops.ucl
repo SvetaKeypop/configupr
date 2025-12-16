@@ -1,0 +1,13 @@
+(def cpu 5e-1)
+$[
+  app: "courses-service",
+  replicas: 3e+0,
+  resources: $[
+    cpulimit: {cpu},
+    memmb: 512e+0,
+  ],
+  env: $[
+    mode: "prod",
+    loglevel: "info",
+  ],
+]
